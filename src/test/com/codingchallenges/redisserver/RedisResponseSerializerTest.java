@@ -1,6 +1,8 @@
 package test.com.codingchallenges.redisserver;
 
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import org.junit.jupiter.api.Test;
 import main.com.codingchallenges.redisserver.Serialise;
 
@@ -49,14 +51,23 @@ public class RedisResponseSerializerTest {
 
     @Test
     public void testSerialiseArray() {
-        // Serialise.SerialiseArray(new String[]{"Hello", "World"});
-        String[] response = new String[]{"Hello", "World"};
-        StringBuilder newMessage = new StringBuilder() ;
-        for (int i = 1; i < response.length; i++) {
-            newMessage.append(response[i] + "\r\n");
+        // Test with mixed types: String and Integer
+        Object[] response = new Object[]{"Hello", 123, "World"};
+
+        // Expected RESP serialized output
+        StringBuilder expectedMessage = new StringBuilder();
+        expectedMessage.append("*").append(response.length).append("\r\n");
+
+        for (Object element : response) {
+            if (element instanceof Integer) {
+                expectedMessage.append(Serialise.SerialiseInteger((Integer) element));
+            } else if (element instanceof String) {
+                expectedMessage.append(Serialise.SerialiseBulkString((String) element));
+            }
         }
-        String expected = "*" + response.length + "\r\n" + newMessage.toString();
-        assert(expected.equals(Serialise.SerialiseArray(response)));
+
+        // Assert expected output matches actual output
+        assertEquals(expectedMessage.toString(), Serialise.SerialiseArray(response));
     }
 
     @Test
