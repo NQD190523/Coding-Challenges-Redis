@@ -4,7 +4,8 @@ package test.com.codingchallenges.redisserver;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
-import main.com.codingchallenges.redisserver.Serialise;
+
+import main.com.codingchallenges.protocol.Serialise;
 
 
 public class RedisResponseSerializerTest {

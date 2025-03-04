@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 
-import main.com.codingchallenges.redisserver.Deserialiser;
+import main.com.codingchallenges.protocol.Deserialiser;
 
 public class RedisResponseDeserializerTest {
     

@@ -1,4 +1,4 @@
-package main.com.codingchallenges.redisserver;
+package main.com.codingchallenges.protocol;
 
 
 public class Deserialiser {

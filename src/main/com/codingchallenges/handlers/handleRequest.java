@@ -4,7 +4,7 @@ import main.com.codingchallenges.protocol.Serialise;
 
 public class handleRequest {
 
-    public static String handleConnection(String[] request) {
+    public static String handleRequests(String[] request) {
         if (request == null || request.length == 0) {
             return Serialise.SerialiseError("ERR no command");
         }
@@ -15,7 +15,7 @@ public class handleRequest {
                 if (request.length > 1) {
                     return Serialise.SerialiseBulkString(request[1]); // Echo argument
                 }
-                return Serialise.SerialiseString("PONG");
+                return handleOutput.writeRespArray(Serialise.SerialiseString("PONG"));
 
             case "SET":
                 if (request.length != 3) {
