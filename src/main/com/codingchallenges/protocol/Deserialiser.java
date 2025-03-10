@@ -47,12 +47,18 @@ public class Deserialiser {
         return value;
     }
 
+
     public static Object[] DeserialiseArray(String message) {
         if (message == null || !message.startsWith("*")) {
             throw new IllegalArgumentException("Invalid RESP array: " + message);
         }
-        String[] lines = message.split("\r\n", -1); // Include empty lines
-        int length = Integer.parseInt(lines[0].substring(1));
+        message = message.replace("\\r\\n", "\r\n");
+        String[] lines = message.split("\r\n"); // Split on CRLF
+        System.out.println("Raw input: " + message.replace("\r\n", "\\r\\n"));
+        for(String line : lines) {
+            System.out.println("Line: " + line);
+        }
+        int length = Integer.parseInt(lines[0].substring(1,2));
         if (length == -1) return null; // Null array
         if (length == 0) return new Object[0]; // Empty array
     

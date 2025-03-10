@@ -13,7 +13,10 @@ public class Serialise {
         return "-" + message.trim() + "\r\n"; // Keep it simple, or uppercase if needed
     }
 
-    public static String SerialiseInteger(int message) {
+    public static String SerialiseInteger(Integer message) {
+        if (message == null) {
+            return "$-1\r\n"; // Could use nil, but aligning with bulk string for simplicity
+        }
         return ":" + message + "\r\n";
     }
 
@@ -40,7 +43,8 @@ public class Serialise {
                 newMessage.append(SerialiseBulkString(null)); // Treat unknown/null as RESP null
             }
         }
-        return newMessage.toString();
+        System.out.println("Arg after serialise: " + newMessage.toString().replace("\r\n", "\\r\\n"));
+        return newMessage.toString().replace("\r\n", "\\r\\n");
     }
 
 

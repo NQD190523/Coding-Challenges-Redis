@@ -37,9 +37,12 @@ public class handleInput {
             }
             return elements;
         } else {
-            return new String[] { firstLine };
+            String[] parts = firstLine.trim().split("\\s+", 2);
+            if (parts.length == 1) {
+                return new String[] { parts[0] };
+            } else {
+                return new String[] { parts[0], parts[1] };
+            }
         }
-
     }
-    
 }

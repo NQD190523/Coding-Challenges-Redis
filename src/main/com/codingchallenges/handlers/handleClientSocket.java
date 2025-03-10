@@ -18,11 +18,11 @@ public class handleClientSocket {
             while (true) {
                 String[] request = handleInput.readRespArray(reader);
                 if (request == null) break; // Client disconnected
-
                 System.out.println("Received request: " + String.join(", ", request));
                 String response = handleRequest.handleRequests(request);
                 writer.write(response);
                 writer.flush();
+                System.out.println("Sent response: " + response);
             }
         } catch (IOException e) {
             System.err.println("Client error: " + e.getMessage());
