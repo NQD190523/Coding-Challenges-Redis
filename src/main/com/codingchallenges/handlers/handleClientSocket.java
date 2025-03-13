@@ -15,17 +15,20 @@ public class handleClientSocket {
             BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream()));
             Socket socket = clientSocket // Auto-close socket
         ) {
+            socket.setSoTimeout(5000);
             while (true) {
                 String[] request = handleInput.readRespArray(reader);
                 if (request == null) break; // Client disconnected
                 System.out.println("Received request: " + String.join(", ", request));
                 String response = handleRequest.handleRequests(request);
+                System.out.println("Raw response: " + response.replace("\r\n", "\\r\\n"));
+                // response = response.replace("\r\n", "\\r\\n");
                 writer.write(response);
                 writer.flush();
                 System.out.println("Sent response: " + response);
             }
         } catch (IOException e) {
             System.err.println("Client error: " + e.getMessage());
-        }
+        } 
     }
 }

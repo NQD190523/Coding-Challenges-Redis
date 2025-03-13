@@ -13,7 +13,7 @@ import main.com.codingchallenges.handlers.handleClientSocket;
 public class RedisServer {
     public static void main(String[] args) throws Exception {
 
-        int port = 6379;
+        int port = 6380;
         InetSocketAddress address = new InetSocketAddress("localhost", port);
         ServerSocket serverSocket = new ServerSocket();
 
@@ -35,7 +35,7 @@ public class RedisServer {
             }
         }));
         // Create a thread pool for handling client connections
-        ExecutorService threadPool = Executors.newFixedThreadPool(10);
+        ExecutorService threadPool = Executors.newFixedThreadPool(50);
         while (true) {
             try {
                 Socket clientSocket = serverSocket.accept();

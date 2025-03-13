@@ -8,9 +8,12 @@ public class DataStore {
         
         public static void set(String key, String value) {
             dataStore.put(key, value);
+            System.out.println("SET: Stored " + key + " = " + value);
         }
     
         public static String get(String key) {
-            return dataStore.get(key);
+            String value = dataStore.get(key);
+            System.out.println("GET: Retrieved " + key + " = " + (value != null ? value : "null"));
+            return value;
         }
 }
