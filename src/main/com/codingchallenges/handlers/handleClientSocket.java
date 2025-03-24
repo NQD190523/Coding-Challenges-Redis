@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 
 public class handleClientSocket {
     
@@ -17,9 +18,9 @@ public class handleClientSocket {
         ) {
             socket.setSoTimeout(5000);
             while (true) {
-                String[] request = handleInput.readRespArray(reader);
+                Object[] request = handleInput.readRespArray(reader);
                 if (request == null) break; // Client disconnected
-                System.out.println("Received request: " + String.join(", ", request));
+                System.out.println("Received request: " + String.join(", ", request.toString()));
                 String response = handleRequest.handleRequests(request);
                 System.out.println("Raw response: " + response.replace("\r\n", "\\r\\n"));
                 // response = response.replace("\r\n", "\\r\\n");
@@ -27,7 +28,10 @@ public class handleClientSocket {
                 writer.flush();
                 System.out.println("Sent response: " + response);
             }
-        } catch (IOException e) {
+        } catch (SocketTimeoutException e) {
+            System.err.println("Client timed out: " + e.getMessage());
+        }
+        catch (IOException e) {
             System.err.println("Client error: " + e.getMessage());
         } 
     }
