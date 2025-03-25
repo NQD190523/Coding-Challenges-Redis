@@ -35,34 +35,47 @@ public class handleRequest {
                 return  desString;// e.g., "$11\r\nHello World\r\n"
 
             case "SET":
-                if (args.length < 3) {
+                if (args.length < 2) {
                     return Serialise.SerialiseError("ERR wrong number of arguments for 'SET' command");
                 }
+                Object key = args[0];
+                Object values = args[1];
                 long expiry = -1; // Default: no expiry
-                String option = args[2].toString().toUpperCase();
-                String arg = args[3].toString();
-                try{
-                    switch (option) {
-                        case "EX":
-                            expiry = System.currentTimeMillis() + (Long.parseLong(arg) * 1000);
-                            break;
-                        case "PX":
-                            expiry = System.currentTimeMillis() + Long.parseLong(arg);
-                            break;
-                        case "EXAT":
-                            expiry = Long.parseLong(arg) * 1000; // Convert seconds to ms
-                            break;
-                        case "PXAT":
-                            expiry = Long.parseLong(arg);
-                            break;
-                        default:
-                            return Serialise.SerialiseError("ERR unknown option '" + arg + "'");
+            
+                // Check if there are optional expiry arguments
+                if (args.length > 2) {
+                    // Ensure pairs of option and value (e.g., EX 10)
+                    if (args.length % 2 != 0) {
+                        return Serialise.SerialiseError("ERR syntax error: missing value for option");
                     }
-                } catch(NumberFormatException e) {
-                    return Serialise.SerialiseError("ERR invalid expiry value: " + arg);
+                    // Parse options starting from args[2]
+                    for (int i = 2; i < args.length; i += 2) {
+                        String option = args[i].toString().toUpperCase();
+                        String arg = args[i + 1].toString();
+                        try {
+                            switch (option) {
+                                case "EX":
+                                    expiry = System.currentTimeMillis() + (Long.parseLong(arg) * 1000);
+                                    break;
+                                case "PX":
+                                    expiry = System.currentTimeMillis() + Long.parseLong(arg);
+                                    break;
+                                case "EXAT":
+                                    expiry = Long.parseLong(arg) * 1000; // Seconds to milliseconds
+                                    break;
+                                case "PXAT":
+                                    expiry = Long.parseLong(arg); // Absolute milliseconds
+                                    break;
+                                default:
+                                    return Serialise.SerialiseError("ERR unknown option '" + option + "'");
+                            }
+                        } catch (NumberFormatException e) {
+                            return Serialise.SerialiseError("ERR invalid expiry value: " + arg);
+                        }
+                    }
                 }
-                DataStore.set(args[0], args[1], expiry);
-                return Serialise.SerialiseString("OK"); // "+OK\r\n"
+                DataStore.set(key, values, expiry);
+                return Serialise.SerialiseString("OK");
             case "GET":
                 if (args.length != 1) {
                     return Serialise.SerialiseError("ERR wrong number of arguments for 'GET' command");
@@ -81,30 +94,30 @@ public class handleRequest {
                     return Serialise.SerialiseError("ERR wrong number of arguments for 'EXISTS' command");
                 }
                 boolean exists = DataStore.isExists(args[0]);
-                return Serialise.SerialiseInteger(exists ? 1 : 0); // ":1\r\n" or ":0\r\n"
+                return Serialise.SerialiseInteger(  (exists ? 1L : 0)); // ":1\r\n" or ":0\r\n"
             case "INCR":
             if (args.length != 1) {
                     return Serialise.SerialiseError("ERR wrong number of arguments for 'INCR' command");
                 }
-                int incr = DataStore.increase(args[0]);
+                Long incr = DataStore.increase(args[0]);
                 return Serialise.SerialiseInteger(incr); // ":n\r\n"
             case "DECR":
             if (args.length != 1) {
                     return Serialise.SerialiseError("ERR wrong number of arguments for 'DECR' command");
                 }
-                int decr = DataStore.decrease(args[0]);
+                Long decr = DataStore.decrease(args[0]);
                 return Serialise.SerialiseInteger(decr); // ":n\r\n"
             case "LPUSH":
             if (args.length < 2) {
                     return Serialise.SerialiseError("ERR wrong number of arguments for 'LPUSH' command");
                 }
-                int leftListLength =  DataStore.lPush(args[0], args[1]);
-                return Serialise.SerialiseInteger(leftListLength); // ":n\r\n"
+                Long leftListLength =  DataStore.lPush(args[0], args[1]);
+                return Serialise.SerialiseInteger((Long) leftListLength); // ":n\r\n"
             case "RPUSH":
             if (args.length < 2) {
                     return Serialise.SerialiseError("ERR wrong number of arguments for 'RPUSH' command");
                 }
-                int rightListLength =  DataStore.rPush(args[0], args[1]);
+                Long rightListLength =  DataStore.rPush(args[0], args[1]);
                 return Serialise.SerialiseInteger(rightListLength); // ":n\r\n"
             default:
                 return Serialise.SerialiseError("ERR unknown command '" + command + "'");

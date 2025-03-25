@@ -29,7 +29,7 @@ public class RedisResponseSerializerTest {
     @Test
     public void testSerialiseInteger() {
         // Serialise.SerialiseInteger(10);
-        int response = 10;
+        Long response = 10L;
         String expected = ":" + response + "\r\n";
         assert(expected.equals(Serialise.SerialiseInteger(response)));
     }
@@ -61,7 +61,7 @@ public class RedisResponseSerializerTest {
 
         for (Object element : response) {
             if (element instanceof Integer) {
-                expectedMessage.append(Serialise.SerialiseInteger((Integer) element));
+                expectedMessage.append(Serialise.SerialiseInteger((Long) element));
             } else if (element instanceof String) {
                 expectedMessage.append(Serialise.SerialiseBulkString((String) element));
             }

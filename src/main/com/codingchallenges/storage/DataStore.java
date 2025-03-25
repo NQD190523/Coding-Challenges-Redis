@@ -53,54 +53,104 @@ public class DataStore {
             }
         }
         //INCR command
-        public static Integer increase(Object key) {
-            return (Integer) dataStore.compute(key, (k, v) -> {
+        public static Long increase(Object key) {
+            return (Long) dataStore.compute(key, (k, v) -> {
                 if (v == null || v.isExpired()) {
                     System.out.println("Not founded key: " + key +", create a new data with new key" );
                     return new ValueData(1L, -1);
                 }
-                if(!(v.value instanceof Integer)) throw new IllegalArgumentException("Value is not a Integer");
-                return new ValueData(( (Integer) v.value) +1,v.expiryTime );
+                if (v.value instanceof Long) {
+                    return new ValueData(((Long) v.value) + 1, v.expiryTime);
+                }
+                if (v.value instanceof Integer) {
+                    return new ValueData(((Integer) v.value) + 1L, v.expiryTime);
+                }
+                if (v.value instanceof String) {
+                    try {
+                        long val = Long.parseLong((String) v.value);
+                        return new ValueData(val + 1, v.expiryTime);
+                    } catch (NumberFormatException e) {
+                        throw new IllegalArgumentException("ERR value is not an integer or out of range");
+                    }
+                }
+                throw new IllegalArgumentException("ERR wrong type");
             }).value;
         }
         //DECR command
-        public static Integer decrease(Object key) {
-            return (Integer) dataStore.compute(key, (k, v) -> {
+        public static Long decrease(Object key) {
+            return (Long) dataStore.compute(key, (k, v) -> {
                 if (v == null || v.isExpired()) {
                     System.out.println("Not founded key: " + key +", create a new data with new key" );
-                    return new ValueData(-1L, -1);
+                    return new ValueData(1L, -1);
                 }
-                if(!(v.value instanceof Integer)) throw new IllegalArgumentException("Value is not a Integer");
-                return new ValueData(( (Integer) v.value) -1,v.expiryTime );
+                if (v.value instanceof Long) {
+                    return new ValueData(((Long) v.value) - 1, v.expiryTime);
+                }
+                if (v.value instanceof Integer) {
+                    return new ValueData(((Integer) v.value) - 1L, v.expiryTime);
+                }
+                if (v.value instanceof String) {
+                    try {
+                        long val = Long.parseLong((String) v.value);
+                        return new ValueData(val - 1, v.expiryTime);
+                    } catch (NumberFormatException e) {
+                        throw new IllegalArgumentException("ERR value is not an integer or out of range");
+                    }
+                }
+                throw new IllegalArgumentException("ERR wrong type");
             }).value;
         }
 
-        public static int lPush(Object key, Object... values) {
-            @SuppressWarnings("unchecked")
-            LinkedList<Object> list = (LinkedList<Object>) dataStore.compute(key, (k,v) ->{
-                if (v == null || v.isExpired()) return new ValueData(new LinkedList<Object>(), -1);
-            if (!(v.value instanceof LinkedList)) throw new IllegalArgumentException("ERR wrong type");
-            return v;
-            }).value;
-
-            for (Object value : values) {
-                list.addFirst(value);
-            }
-            return list.size();
+        public static long lPush(Object key, Object... values) {
+            ValueData updatedValue = dataStore.compute(key, (k, v) -> {
+                // Create new list if null or expired, otherwise get existing list
+                @SuppressWarnings("unchecked")
+                LinkedList<Object> currentList = (v == null || v.isExpired()) 
+                    ? new LinkedList<>() 
+                    : (v.value instanceof LinkedList) 
+                        ? (LinkedList<Object>) v.value 
+                        : null;
+        
+                // Check type and throw error if not a list
+                if (currentList == null) {
+                    throw new IllegalArgumentException("ERR wrong type");
+                }
+        
+                // Add values to the head of the list
+                for (Object value : values) {
+                    currentList.addFirst(String.valueOf(value));
+                }
+        
+                // Return updated ValueData with existing expiry or default -1
+                return new ValueData(currentList, v == null ? -1 : v.expiryTime);
+            });
+            return ((LinkedList<?>) updatedValue.value).size();
         }
 
-        public static int rPush(Object key, Object... values) {
-            @SuppressWarnings("unchecked")
-            LinkedList<Object> list = (LinkedList<Object>) dataStore.compute(key, (k,v) ->{
-                if (v == null || v.isExpired()) return new ValueData(new LinkedList<Object>(), -1);
-            if (!(v.value instanceof LinkedList)) throw new IllegalArgumentException("ERR wrong type");
-            return v;
-            }).value;
-
-            for (Object value : values) {
-                list.addLast(value);
-            }
-            return list.size();
+        public static long rPush(Object key, Object... values) {
+            ValueData updatedValue = dataStore.compute(key, (k, v) -> {
+                // Create new list if null or expired, otherwise get existing list
+                @SuppressWarnings("unchecked")
+                LinkedList<Object> currentList = (v == null || v.isExpired()) 
+                    ? new LinkedList<>() 
+                    : (v.value instanceof LinkedList) 
+                        ? (LinkedList<Object>) v.value 
+                        : null;
+        
+                // Check type and throw error if not a list
+                if (currentList == null) {
+                    throw new IllegalArgumentException("ERR wrong type");
+                }
+        
+                // Add values to the head of the list
+                for (Object value : values) {
+                    currentList.addLast(String.valueOf(value));
+                }
+        
+                // Return updated ValueData with existing expiry or default -1
+                return new ValueData(currentList, v == null ? -1 : v.expiryTime);
+            });
+            return ((LinkedList<?>) updatedValue.value).size();
         }
 
         public static void save(String filepath) {
@@ -109,6 +159,7 @@ public class DataStore {
                     ValueData value = dataStore.get(key);
                     if(!value.isExpired()){
                         if(value.value instanceof LinkedList){
+                            @SuppressWarnings("unchecked")
                             LinkedList<String> list = (LinkedList<String>) value.value;
                             writer.write("L|" +key + "|" + String.join(",", list) + "|" + value.expiryTime );
                         } else if(value.value instanceof String){

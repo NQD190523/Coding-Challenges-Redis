@@ -13,7 +13,7 @@ public class Serialise {
         return "-" + message.trim() + "\r\n"; // Keep it simple, or uppercase if needed
     }
 
-    public static String SerialiseInteger(Integer message) {
+    public static String SerialiseInteger(Long message) {
         if (message == null) {
             return "$-1\r\n"; // Could use nil, but aligning with bulk string for simplicity
         }
@@ -36,7 +36,7 @@ public class Serialise {
         newMessage.append("*").append(message.length).append("\r\n");
         for (Object element : message) {
             if (element instanceof Integer) {
-                newMessage.append(SerialiseInteger((Integer) element));
+                newMessage.append(SerialiseInteger((Long) element));
             } else if (element instanceof String) {
                 newMessage.append(SerialiseBulkString((String) element));
             } else {
