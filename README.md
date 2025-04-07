@@ -50,8 +50,8 @@ redis-benchmark -h localhost -p 6380 -c 50 -n 10000
 
 👤 **Duc Nguyen**
 
-* Github: [@DucDUc](https://github.com/DucDUc)
-* LinkedIn: [@Đức Nguyễn](https://linkedin.com/in/Đức Nguyễn)
+* Github: [@DucDUc](https://github.com/NQD190523)
+* LinkedIn: [@Đức Nguyễn](https://www.linkedin.com/in/ducduc/)
 
 ## Show your support
 
